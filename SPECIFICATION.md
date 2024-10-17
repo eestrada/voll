@@ -240,11 +240,12 @@ to specify which type of quotation marks to strip
 or the implementation MAY choose the type automatically
 or the implementation MAY support both modes (automatic or explicit).
 In any case, the behavior MUST be communicated/documented.
-If not surrounding whitespace or quotation marks are present,
+If no surrounding whitespace or quotation marks are present,
 this SHOULD silently succeed without raising an error.
 
 The same quote stripping behavior described in the previous paragraph
 MAY be implemented for the default string retrieval procedures(s) as well.
+Again, this MUST NOT be the default mode of retrieval.
 
 Implementations MAY allow procedures
 that return the value in its original string form
@@ -277,11 +278,26 @@ an implementation only MUST support reading/parsing of the format.
 
 An implementation MAY offer a convenience feature to convert a file/stream
 to another format, such as JSON or YAML,
-or to parse the file in such a way as to easy convert it later to another format.
+or to parse the file in such a way as to easily convert it later to another format.
 This is NOT REQUIRED functionality.
 So long as the implementation also implements the requirements of this specification,
 it is considered a compliant implementation.
 More thought is needed around this. This is not finalized.
+
+An implementation MAY offer a procedure to parse values as JSON values.
+If such a procedure is implemented,
+it MUST strictly adhere to JSON syntax for the values.
+For example, strings MUST be surrounded with double quotes,
+and all other unquoted values must unambiguously map
+to valid literals for other non-string JSON types.
+In other words, YAML style implicit conversions MUST NOT ever happen.
+If values cannot be properly parsed,
+then parsing should halt and an error MUST be returned.
+
+Such a procedure is NOT REQUIRED to returned this parsed result in the default
+datatype or structure used to return regular parsing results.
+For example, in Python this may just return a plain old nested Python dict.
+This could then be written out to JSON using the builtin JSON module.
 
 ### Application Requirements
 
