@@ -65,7 +65,8 @@ YAML may be the worst configuration language ever foisted upon us all.
 Its semantics are not clear
 and many values get coerced into unexpected types without warning.
 
-Several parsers have explicitly chosen to **not** be compliant with the spec
+[Some parsers](https://hitchdev.com/strictyaml/why/implicit-typing-removed/)
+have explicitly chosen to **not** be compliant with the spec
 just so that users can have a sane experience editing files.
 
 Don't choose YAML.
