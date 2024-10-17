@@ -9,14 +9,13 @@ like JSON, YAML, or TOML, except simpler.
 Simpler is better.
 
 Many years ago, I came across a discussion thread
-(~~[on Google+](https://plus.google.com/+LinusTorvalds/posts/X2XVf9Q7MfV)~~
-like so many other Google products Google+ is now dead,
-and so this link is dead too)
+(~~[on Google+](https://plus.google.com/+LinusTorvalds/posts/X2XVf9Q7MfV "like so many other Google products Google+ is now dead, and so this link is dead too")~~
+dead link)
 of Linus Torvalds complaining
 about the unnecessary complexity of modern file formats,
 specifically XML.
-The comments focused on that fact
-that even line-delimited key=value pairs are often better than XML and JSON.
+The comments focused on the fact
+that simple line-delimited key=value pairs are often better than XML and JSON.
 I agree.
 
 It got me thinking about reducing a configuration language
@@ -53,10 +52,13 @@ and it does that okay in some ways.
 But in other ways it is hardly an improvement at all.
 
 For example, it still offers several ways to specify arrays
-some of which are not very obvious.
+some of which are not very obvious (ala YAML).
 In fact, there are two or three ways to specify nearly everything;
 this is a terrible idea.
-Also, it includes a datetime format,
+For a configuration format there should be one way to specify things.
+Less is more here.
+
+Also, it includes an implicitly parsed datetime format,
 which is a footgun.
 
 ### Why not YAML?
@@ -74,20 +76,22 @@ Don't choose YAML.
 ### Why not INI?
 
 INI is simple, but has no standard specification.
+Also, it isn't line delimited so a more intelligent parser is needed.
 
 ### Why not dotenv?
 
-Same as INI.
+Simple, but no standard specification.
+Also, it only supports basic key=value data shape, not nested structures.
 
 ### Why not JSON?
 
 No comments, no trailing commas,
-requires a more advanced parser to do anything useful.
+requires a more advanced parser to retrieve values.
 
 ### Why not JSON5?
 
 Has comments and trailing commas (hurray!),
-but still requires an even more advanced parser than JSON.
+but requires an even *more* advanced parser than even plain old JSON.
 
 ### Are you just a curmudgeon about file formats?
 
