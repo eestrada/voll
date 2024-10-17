@@ -300,6 +300,12 @@ In other words, YAML style implicit conversions MUST NOT ever happen.
 If values cannot be properly parsed,
 then parsing should halt and an error MUST be returned.
 
+If such a procedure is supplied,
+it MUST NOT allow for excess whitespace around values.
+The syntax parsing around the key and the first equals sign
+MUST NOT change in this mode.
+The only thing that changes is how values are interpreted.
+
 Such a procedure is NOT REQUIRED to returned this parsed result in the default
 datatype or structure used to return regular parsing results.
 For example, in Python this may just return a plain old nested Python dict.
