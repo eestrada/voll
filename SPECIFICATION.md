@@ -43,17 +43,23 @@ Trailing whitespace following any non-whitespace characters,
 but preceding the newline
 MUST be included in the parsed value string.
 
+In other words, all characters following the first equals sign,
+but before the newline
+are included in the parsed value.
+
 Keys MUST adhere to the following regex:
 
 ```regex
 [a-zA-Z][a-zA-Z0-9_.]*
 ```
 
-In written language, this is ASCII letters for the first
+In written language, this is an ASCII letter for the first
 character, and all subsequent characters must be ASCII alphanumeric values
 or underscore (`_`) or dot (`.` AKA "period").
+A key MUST contain at least one character.
+There is no upper limit to the length of a key.
 
-Keys MUST be considered case sensitive.
+Keys MUST be considered case sensitive by default.
 
 Values after the equals sign may hold any UTF-8 code points
 except newline (`\n`) and NUL (`\0`).
