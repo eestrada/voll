@@ -24,12 +24,15 @@ The (relatively) recently created [TOML](https://en.wikipedia.org/wiki/TOML)
 inspired the name.
 
 This repo holds the specification of such a reduced configuration language: VOLL.
-To date, I do not know of a configuration file format that is line delimited
-other than dotenv.
-However, dotenv is not strictly specified and implementations differ.
+To date, I do not know of a portable,
+well defined,
+widely available configuration file format that is line delimited.
+`dotenv` exists, but it is not strictly specified and implementations differ.
+FreeBSD configuration files have a fairly standard format,
+but other than the implementation that parses them,
+I do not know if there is a specification for them.
 Voll is meant to be tightly specified enough
-to be easily portable between implementations
-ala JSON, etc.
+to be easily portable between implementations and systems, like JSON.
 
 This repo also holds a reference implementation in POSIX shell.
 The rationale is: if it cannot be simply implemented in plain old shell

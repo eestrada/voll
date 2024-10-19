@@ -1,0 +1,33 @@
+#!/usr/bin/env cat
+# Comment lines allowed. They are ignored.
+
+# blank lines allowed. They are ignored.
+        
+parent1.child01=true
+parent1.child03=false
+parent1.child04=null
+parent1.child05=100
+parent1.child06=-100
+parent1.child07=100.1
+parent1.child08=-100.1
+parent1.child09="quoted"
+parent1.child10= "quoted with leading and trailing whitespace" 
+parent1.child11=0.0
+parent1.child12=-0.0
+
+# This should generate a JSON file that looks similar to the following:
+# {
+#   "parent1": {
+#     "child01": true,
+#     "child03": false,
+#     "child04": null,
+#     "child05": 100,
+#     "child06": -100,
+#     "child07": 100.1,
+#     "child08": -100.1,
+#     "child09": "quoted",
+#     "child10": "quoted with leading and trailing whitespace",
+#     "child11": 0.0,
+#     "child12": -0.0
+#   }
+# }

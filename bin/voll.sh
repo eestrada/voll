@@ -100,12 +100,13 @@ ws_re='[ \t]*'
 key_re='[a-zA-Z][a-zA-Z0-9_.]*'
 safe_key_re='s/\./\\./'
 main_re='^[ \t]*([a-zA-Z][a-zA-Z0-9_.]*)[ \t]*=(.*)$'
+main_ltrim_value_re='^[ \t]*([a-zA-Z][a-zA-Z0-9_.]*)[ \t]*=[ \t]*(.*)$'
 comment_re='^[ \t]*(#.*)$'
 blank_re='^[ \t]*$'
 list_key_re="s/${main_re}/\1/"
 list_value_re="s/${main_re}/\2/"
-ltrim_re='s/^[ \t]*//'
-rtrim_re='s/[ \t]*$//'
+ltrim_sed_re='s/^[ \t]*//'
+rtrim_sed_re='s/[ \t]*$//'
 
 _sed_cmd_str=""
 
@@ -138,15 +139,26 @@ list_values() {
 }
 
 ltrim_lines() {
-    sed -E "${ltrim_re}"
+    sed -E "${ltrim_sed_re}"
 }
 
 rtrim_lines() {
-    sed -E "${rtrim_re}"
+    sed -E "${rtrim_sed_re}"
+}
+
+trim_all() {
+    sed -E "s/${main_ltrim_value_re}/\1=\2/; ${rtrim_sed_re}"
 }
 
 voll_to_json() {
-    filter_blank_lines | filter_comment_lines | jq 'rtrimstr("\n") | . / "\n"' --raw-input --slurp
+    filter_blank_lines |
+        filter_comment_lines |
+        trim_all |
+        jq --raw-input --compact-output 'rtrimstr("\n") | [capture( "^(?<key>[^:]*)=(?<value>.*)$" )] | .[0] | .key as $key | (.value | fromjson) as $value | {} | setpath($key / "."; $value)' |
+        jq --slurp 'reduce .[] as $item ({}; . * $item)'
+    # jq 'rtrimstr("\n") | [capture( "^(?<key>[^:]*)=(?<value>.*)$" )] | .[0] | .key as $key | (.value | fromjson) as $value | {} | setpath($key / "."; $value) ' --raw-input
+    # jq 'rtrimstr("\n") | [capture( "^(?<key>[^:]*)=(?<value>.*)$" )] | .[0] | .key as $key | (.value | fromjson) as $value| from_entries | del([$key]) | setpath($key / "."; $value) ' --raw-input
+    # jq 'rtrimstr("\n") | [capture( "^(?<key>[^:]*)=(?<value>.*)$" )] | from_entries | with_entries(.value = (.value | fromjson)) | foreach .[] as $item ({}; $item; setpath($item.key / "."; $item.value) ) ' --raw-input
 }
 
 json_to_voll() {
