@@ -1,12 +1,13 @@
+#!/usr/bin/env cat
 # Comment lines allowed. They are ignored.
 
 # blank lines allowed. They are ignored.
         
-parent1.child1=value1
-parent1.child2=value2
-parent1.child3="quoted value"
-parent1.child4= "quoted value with leading and trailing whitespace" 
-parent1.child5= unquoted value with leading and trailing whitespace 
-parent1.child6= unquoted value with leading whitespace
-parent1.child7=with trailing whitespace 
+parent1.child1=bare_value1
+parent1.child2=bare_value2
+parent1.child3="quoted"
+parent1.child4= "quoted with leading and trailing whitespace" 
+parent1.child5= unquoted with leading and trailing whitespace 
+parent1.child6= unquoted with leading whitespace
+parent1.child7=unquoted with trailing whitespace 
 
