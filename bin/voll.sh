@@ -65,8 +65,8 @@ ws_flag='o'
 quote_flag='o'
 json_flag='o'
 
-while getopts ":hig:n:w:q:j:" o; do
-    case "${o}" in
+while getopts ":hig:n:w:q:j:" opt; do
+    case "${opt}" in
     h)
         usage 0
         ;;
@@ -109,15 +109,15 @@ rtrim_re='s/[ \t]*$//'
 
 _sed_cmd_str=""
 
-voll_filter_blank_lines() {
+filter_blank_lines() {
     sed -E "/${blank_re}/d"
 }
 
-voll_filter_comment_lines() {
+filter_comment_lines() {
     sed -E "/${comment_re}/d"
 }
 
-voll_is_key() {
+is_key() {
     _key="$(cat)"
     if [ -n "${_key}" ] && [ "$(printf '%s' "${_key}" | wc -l)" -le '1' ]; then
         # `grep` returns non-zero when it finds no matches.
@@ -129,26 +129,47 @@ voll_is_key() {
     fi
 }
 
-voll_list_keys() {
+list_keys() {
     sed -E "${list_key_re}"
 }
 
-voll_list_values() {
+list_values() {
     sed -E "${list_value_re}"
 }
 
-voll_ltrim_lines() {
+ltrim_lines() {
     sed -E "${ltrim_re}"
 }
 
-voll_rtrim_lines() {
+rtrim_lines() {
     sed -E "${rtrim_re}"
 }
 
-printf 'Passed arguments: %s' "$@"
+voll_to_json() {
+    filter_blank_lines | filter_comment_lines | jq 'rtrimstr("\n") | . / "\n"' --raw-input --slurp
+}
+
+json_to_voll() {
+    cat | jq '. / "\n"' --raw-input --slurp
+}
 
 # shellcheck disable=2002
 # cat "$1" | voll_filter_comment_lines | voll_filter_blank_lines | voll_list_values
 # cat "$1" | voll_filter_comment_lines | voll_filter_blank_lines | voll_list_keys
 
-printf 'en\nrico\n' | voll_is_key
+case "${json_flag}" in
+r)
+    cat "$1" | voll_to_json
+    exit
+    ;;
+w)
+    cat "$1" | json_to_voll
+    exit
+    ;;
+o)
+    # Do nothing in "off" case.
+    ;;
+*)
+    usage 2
+    ;;
+esac
