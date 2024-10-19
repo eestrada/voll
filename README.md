@@ -28,8 +28,9 @@ To date, I do not know of a portable,
 well defined,
 widely available configuration file format that is line delimited.
 `dotenv` exists, but it is not strictly specified and implementations differ.
-FreeBSD configuration files have a fairly standard format,
-but other than the implementation that parses them,
+FreeBSD configuration files have a fairly standard format that is similar to VOLL
+(this was actually one of the inspirations for VOLL),
+but other than the FreeBSD implementation that parses them,
 I do not know if there is a specification for them.
 Voll is meant to be tightly specified enough
 to be easily portable between implementations and systems, like JSON.

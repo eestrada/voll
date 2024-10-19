@@ -63,6 +63,11 @@ get_key=
 
 ws_flag='o'
 quote_flag='o'
+
+# Action flag options
+# - r : Read JSON from input and output in VOLL format.
+# - w : Read VOLL from input and output in JSON format.
+# - o : Don't do anything related to JSON (the default).
 json_flag='o'
 
 while getopts ":hig:n:w:q:j:" opt; do
@@ -151,30 +156,30 @@ trim_all() {
 }
 
 voll_to_json() {
+    # FIXME: invoke jq only once instead of pipelining it twice.
+    # It should be possible to reduce the inputs as an array
+    # instead of as a series of inputs.
+    # Using the `--slurp` option on the first invocation should make this possible,
+    # but the rest of the filtering will need to be refactored to accommodate this change.
     filter_blank_lines |
         filter_comment_lines |
         trim_all |
         jq --raw-input --compact-output 'rtrimstr("\n") | [capture( "^(?<key>[^:]*)=(?<value>.*)$" )] | .[0] | .key as $key | (.value | fromjson) as $value | {} | setpath($key / "."; $value)' |
         jq --slurp 'reduce .[] as $item ({}; . * $item)'
-    # jq 'rtrimstr("\n") | [capture( "^(?<key>[^:]*)=(?<value>.*)$" )] | .[0] | .key as $key | (.value | fromjson) as $value | {} | setpath($key / "."; $value) ' --raw-input
-    # jq 'rtrimstr("\n") | [capture( "^(?<key>[^:]*)=(?<value>.*)$" )] | .[0] | .key as $key | (.value | fromjson) as $value| from_entries | del([$key]) | setpath($key / "."; $value) ' --raw-input
-    # jq 'rtrimstr("\n") | [capture( "^(?<key>[^:]*)=(?<value>.*)$" )] | from_entries | with_entries(.value = (.value | fromjson)) | foreach .[] as $item ({}; $item; setpath($item.key / "."; $item.value) ) ' --raw-input
 }
 
 json_to_voll() {
     cat | jq '. / "\n"' --raw-input --slurp
 }
 
-# shellcheck disable=2002
-# cat "$1" | voll_filter_comment_lines | voll_filter_blank_lines | voll_list_values
-# cat "$1" | voll_filter_comment_lines | voll_filter_blank_lines | voll_list_keys
-
 case "${json_flag}" in
 r)
+    # shellcheck disable=2002
     cat "$1" | voll_to_json
     exit
     ;;
 w)
+    # shellcheck disable=2002
     cat "$1" | json_to_voll
     exit
     ;;
