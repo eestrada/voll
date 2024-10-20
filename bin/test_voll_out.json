@@ -1,0 +1,15 @@
+{
+  "parent1": {
+    "child01": true,
+    "child03": false,
+    "child04": null,
+    "child05": 100,
+    "child06": -100,
+    "child07": 100.1,
+    "child08": -100.1,
+    "child09": "quoted",
+    "child10": "quoted with leading and trailing whitespace",
+    "child11": 0.0,
+    "child12": -0.0
+  }
+}

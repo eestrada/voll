@@ -101,6 +101,10 @@ while getopts ":hig:n:w:q:j:" opt; do
 done
 shift $((OPTIND - 1))
 
+# If no input file is given, default to stdin using the `-` file.
+# cat will treat this value appropriately.
+in_file="${1:-'-'}"
+
 ws_re='[ \t]*'
 key_re='[a-zA-Z][a-zA-Z0-9_.]*'
 safe_key_re='s/\./\\./'
@@ -124,7 +128,7 @@ filter_comment_lines() {
 }
 
 is_key() {
-    _key="$(cat)"
+    _key="$1"
     if [ -n "${_key}" ] && [ "$(printf '%s' "${_key}" | wc -l)" -le '1' ]; then
         # `grep` returns non-zero when it finds no matches.
         # `sed` only returns non-zero on error.
@@ -155,13 +159,22 @@ trim_all() {
     sed -E "s/${main_ltrim_value_re}/\1=\2/; ${rtrim_sed_re}"
 }
 
+get_value_by_key() {
+    _key="$1"
+    is_key "$_key" || exit 2
+    _safe_key="$(printf '%s' "$_key" | sed -E "s/\./\\./")"
+    # shellcheck disable=2002
+    cat "$in_file" | sed -E "/^[ \t]*(${_safe_key})[ \t]*=/!d ; s/^[ \t]*(${_safe_key})[ \t]*=(.*)$/\2/"
+}
+
 voll_to_json() {
     # FIXME: invoke jq only once instead of pipelining it twice.
     # It should be possible to reduce the inputs as an array
     # instead of as a series of inputs.
     # Using the `--slurp` option on the first invocation should make this possible,
     # but the rest of the filtering will need to be refactored to accommodate this change.
-    filter_blank_lines |
+    # shellcheck disable=2002
+    cat "$in_file" | filter_blank_lines |
         filter_comment_lines |
         trim_all |
         jq --raw-input --compact-output 'rtrimstr("\n") | [capture( "^(?<key>[^:]*)=(?<value>.*)$" )] | .[0] | .key as $key | (.value | fromjson) as $value | {} | setpath($key / "."; $value)' |
@@ -169,22 +182,55 @@ voll_to_json() {
 }
 
 json_to_voll() {
-    cat | jq '. / "\n"' --raw-input --slurp
+    # shellcheck disable=2002
+    cat "$in_file" | jq '.'
 }
 
 case "${json_flag}" in
-r)
+w)
     # shellcheck disable=2002
     cat "$1" | voll_to_json
     exit
     ;;
-w)
+r)
     # shellcheck disable=2002
     cat "$1" | json_to_voll
     exit
     ;;
 o)
     # Do nothing in "off" case.
+    ;;
+*)
+    usage 2
+    ;;
+esac
+
+# Action flag options
+# - i : identity
+# - g : get value associated with key.
+# - a : Normalize all (keys and values)
+# - k : Normalize keys.
+# - v : Normalize values.
+# action_flag='i'
+# get_key=
+case "${action_flag}" in
+g)
+    # shellcheck disable=2002
+    get_value_by_key "$get_key"
+    exit
+    ;;
+a)
+    # normalize all
+    exit
+    ;;
+k)
+    # normalize keys.
+    ;;
+v)
+    # normalize values.
+    ;;
+i)
+    # Do nothing in "identity" case.
     ;;
 *)
     usage 2
