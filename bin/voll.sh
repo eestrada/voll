@@ -189,12 +189,12 @@ json_to_voll() {
 case "${json_flag}" in
 w)
     # shellcheck disable=2002
-    cat "$1" | voll_to_json
+    voll_to_json
     exit
     ;;
 r)
     # shellcheck disable=2002
-    cat "$1" | json_to_voll
+    json_to_voll
     exit
     ;;
 o)
