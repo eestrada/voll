@@ -16,22 +16,27 @@ Option flags MUST come before arguments.
         -i:        Identity. Literally just sends out what came in.
                    This is the default action.
         -g <key>:  Get the value associated with the given key (after any requested stripping)
-                   Command exits with a non-zero return code of 3 if it isn't found.
-                   This is to differentiate between a key that doesn't exists
-                   versus an empty value (which is a possible return value).
-        -n <what>: Normalize format.
+                   Command exits with a non-zero status code if it isn't found.
+                   This is to differentiate between a key that doesn't exist
+                   versus an empty value (which is a valid value in VOLL).
+        -c <what>: Conform.
                    Valid arguments are "all", "keys", or "values".
-                   Normalizing currently just strips off surrounding whitespace.
+                   Conforming currently just strips off surrounding whitespace.
                    Comments and blank lines are left unchanged.
                    Quote stripping arguments are currently ignored.
+                   It is always safe to conform keys.
+                   Depending on the expectations of ingestingn programs,
+                   it may or may not be safe to conform values.
 
     Basic Formatting flags:
-        -w <mode>: How (or if) to do whitespace stripping.
+        -w <mode>: How (or if) to do whitespace stripping for returned values.
                    Valid arguments are "all", "left", "right", or "off" (the default).
         -q <mode>: How (or if) to do quote stripping.
                    Valid options are "auto", "single", "double", or "off" (the default).
-                   Automatic quote stripping cannot be done in a streaming fashion
-                   and should be avoided on files too large to fit in memory.
+                   Automatic quote stripping will attempt to strip off double quotes,
+                   then will attempt to strip off single quotes.
+                   If a value has both, in that order, it will strip off both sets.
+                   For this reason, "auto" mode in this tool is not recommended.
 
     Extended flags:
         All Action and Formatting flags are ignored when any extended flags are used.
@@ -39,10 +44,25 @@ Option flags MUST come before arguments.
         -j <mode>: JSON action.
                    Valid arguments are "write", "read", or "off" (the default).
                    "write" will convert the input voll file to JSON.
-                   This mode automatically strips whitespace surrounding values prior to conversion.
+                   In "literal" string mode,
+                   this mode automatically strips whitespace surrounding values prior to conversion.
                    "read" will treat input as a JSON blob and convert it as output to voll format.
                    Output keys and values are never whitespace padded.
                    Any mode other than "off" will ignore all basic action and formatting options.
+        -s <mode>: JSON string mode.
+                   Valid arguments are "string", or "literal" (the default).
+                   By default, JSON output assumes
+                   that VOLL input contains valid JSON literals for values.
+                   However, under certain circumstancs it may make more sense
+                   to parse all values as just strings.
+                   String only mode is safer
+                   and cannot fail due to values
+                   that do not conform to JSON literal syntax.
+                   It can, however, still fail for input
+                   that is not in valid VOLL format.
+                   Whitespace and quote stripping options are respected in "string" mode,
+                   whereas they are ignored in "literal" mode.
+
 
 EOF_HEREDOC
 )
@@ -55,22 +75,27 @@ usage() {
 # Action flag options
 # - i : identity
 # - g : get value associated with key.
-# - a : Normalize all (keys and values)
-# - k : Normalize keys.
-# - v : Normalize values.
+# - a : Conform all (keys and values)
+# - k : Conform keys.
+# - v : Conform values.
 action_flag='i'
 get_key=
 
 ws_flag='o'
 quote_flag='o'
 
-# Action flag options
+# JSON Action flag options
 # - r : Read JSON from input and output in VOLL format.
 # - w : Read VOLL from input and output in JSON format.
 # - o : Don't do anything related to JSON (the default).
 json_flag='o'
 
-while getopts ":hig:n:w:q:j:" opt; do
+# JSON string mode flag options
+# - s : Treat VOLL input values as JSON strings.
+# - l : Treat VOLL input values as JSON literals (the default).
+json_value_flag='l'
+
+while getopts ":hig:c:w:q:j:s:" opt; do
     case "${opt}" in
     h)
         usage 0
@@ -82,7 +107,7 @@ while getopts ":hig:n:w:q:j:" opt; do
         action_flag='g'
         get_key="${OPTARG}"
         ;;
-    n)
+    c)
         action_flag="$(printf '%.1s' "$OPTARG")"
         ;;
     w)
@@ -93,6 +118,9 @@ while getopts ":hig:n:w:q:j:" opt; do
         ;;
     j)
         json_flag="$(printf '%.1s' "$OPTARG")"
+        ;;
+    s)
+        json_value_flag="$(printf '%.1s' "$OPTARG")"
         ;;
     *)
         usage 2
@@ -161,10 +189,21 @@ trim_all() {
 
 get_value_by_key() {
     _key="$1"
-    is_key "$_key" || exit 2
+    is_key "$_key" ||
+        (printf '%s' "The given key \"${_key}\" is not valid. Keys must conform to this regex: ${key_re}" 1>&2 && exit 2)
     _safe_key="$(printf '%s' "$_key" | sed -E "s/\./\\./")"
+
+    # Grep is used instead of sed,
+    # because it will return a non-zero exit code
+    # if no occurrences of the key are found
+    # whereas sed will still return zero.
+
+    set -e
     # shellcheck disable=2002
-    cat "$in_file" | sed -E "/^[ \t]*(${_safe_key})[ \t]*=/!d ; s/^[ \t]*(${_safe_key})[ \t]*=(.*)$/\2/"
+    cat "$in_file" |
+        grep -E "^[ \t]*(${_safe_key})[ \t]*=" |
+        tail -n 1 |
+        sed -E "s/^[ \t]*(${_safe_key})[ \t]*=(.*)$/\2/"
 }
 
 voll_to_json() {
@@ -173,6 +212,8 @@ voll_to_json() {
     # instead of as a series of inputs.
     # Using the `--slurp` option on the first invocation should make this possible,
     # but the rest of the filtering will need to be refactored to accommodate this change.
+
+    set -e
     # shellcheck disable=2002
     cat "$in_file" | filter_blank_lines |
         filter_comment_lines |
@@ -208,9 +249,9 @@ esac
 # Action flag options
 # - i : identity
 # - g : get value associated with key.
-# - a : Normalize all (keys and values)
-# - k : Normalize keys.
-# - v : Normalize values.
+# - a : conform all (keys and values)
+# - k : conform keys.
+# - v : conform values.
 # action_flag='i'
 # get_key=
 case "${action_flag}" in
@@ -220,14 +261,14 @@ g)
     exit
     ;;
 a)
-    # normalize all
+    # conform all
     exit
     ;;
 k)
-    # normalize keys.
+    # conform keys.
     ;;
 v)
-    # normalize values.
+    # conform values.
     ;;
 i)
     # Do nothing in "identity" case.

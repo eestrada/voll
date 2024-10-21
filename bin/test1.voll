@@ -6,6 +6,7 @@
 parent1.child1=bare_value1
 parent1.child2=bare_value2
 parent1.child3="quoted"
+parent1.child3="repeat key"
 parent1.child4= "quoted with leading and trailing whitespace" 
 parent1.child5= unquoted with leading and trailing whitespace 
 parent1.child6= unquoted with leading whitespace
