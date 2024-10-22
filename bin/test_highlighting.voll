@@ -1,0 +1,43 @@
+#!/usr/bin/env cat
+# Comment lines allowed. They are ignored.
+# TODO: todos SHOULD be highlighted
+
+# blank lines allowed. They are ignored.
+        
+# JSON true literal
+parent1.child01=true
+
+# JSON false literal
+parent1.child03=false
+
+# JSON null literal
+parent1.child04=null
+
+# JSON int literal
+parent1.child05=100
+
+# JSON negative int literal
+parent1.child06=-100
+
+# JSON float literal
+parent1.child07=100.1
+
+# JSON negative float literal
+parent1.child08=-100.1
+
+# JSON string literal
+parent1.child09="quoted"
+
+# JSON string literal
+parent1.child10= "quoted with leading and trailing whitespace" 
+
+# JSON string literal with escapes
+parent1.child11="quoted with \"internal\" escapes"
+
+# JSON true literal
+parent1.child14=unquoted non-JSON compatible value (should error during JSON parsing)
+
+# JSON fake JSON string literal.
+# The "comment"  trailing the string is part of the value 
+# and should NOT be highlighted as a comment.
+parent1.child15="value" #this should NOT be highlighted as a comment
