@@ -31,11 +31,17 @@ parent1.child09="quoted"
 # JSON string literal
 parent1.child10= "quoted with leading and trailing whitespace" 
 
-# JSON string literal with escapes
+# JSON string literal with internal escapes
 parent1.child11="quoted with \"internal\" escapes"
 
-# JSON true literal
-parent1.child14=unquoted non-JSON compatible value (should error during JSON parsing)
+# Not a JSON literal
+parent1.child14=unquoted value (should error during JSON parsing)
+
+# Not a JSON literal. Embedded quotes should NOT highlight like a string.
+parent1.child14=unquoted value "with quotes embedded" (should error during JSON parsing)
+
+# Not a JSON literal. Embedded literals should NOT highlight like literals.
+parent1.child14=unquoted value with embedded literals true false null 100 100.1 (should error during JSON parsing)
 
 # JSON fake JSON string literal.
 # The "comment"  trailing the string is part of the value 
