@@ -8,6 +8,9 @@ To be used as a config language
 like JSON, YAML, or TOML, except simpler.
 Simpler is better.
 
+VOLL is pronounced like [vole](https://en.wikipedia.org/wiki/Vole)
+(the North America field mouse).
+
 Many years ago, I came across a discussion thread
 (~~[on Google+](https://plus.google.com/+LinusTorvalds/posts/X2XVf9Q7MfV "like so many other Google products Google+ is now dead, and so this link is dead too")~~
 dead link)
@@ -33,7 +36,11 @@ FreeBSD configuration files have a fairly standard format that is similar to VOL
 but other than the FreeBSD implementation that parses them,
 I do not know if there is a specification for them.
 Voll is meant to be tightly specified enough
-to be easily portable between implementations and systems, like JSON.
+to be easily portable between implementations and systems, like JSON,
+but also simple enough that someone with only a text editor and no tooling
+can be fairly certain they are formatting the file correctly.
+
+![Just use regex parseable line-delimited key/value pairs](./static/config_bell_curve.jpg "Just use regex parseable line-delimited key/value pairs")
 
 This repo also holds a reference implementation in POSIX shell.
 The rationale is: if it cannot be simply implemented in plain old shell
