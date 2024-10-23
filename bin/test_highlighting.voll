@@ -10,6 +10,9 @@ parent1.child01=true
 # JSON false literal
 parent1.child03=false
 
+# JSON false literal with padding spaces
+parent1.child03= false  
+
 # JSON null literal
 parent1.child04=null
 
@@ -19,11 +22,17 @@ parent1.child05=100
 # JSON negative int literal
 parent1.child06=-100
 
+# JSON negative int literal with padding spaces
+parent1.child06= -100    
+
 # JSON float literal
 parent1.child07=100.1
 
 # JSON negative float literal
 parent1.child08=-100.1
+#
+# JSON negative float literal with padding spaces
+parent1.child08= -100.1   
 
 # JSON string literal
 parent1.child09="quoted"
@@ -42,6 +51,10 @@ parent1.child14=unquoted value "with quotes embedded" (should error during JSON 
 
 # Not a JSON literal. Embedded literals should NOT highlight like literals.
 parent1.child14=unquoted value with embedded literals true false null 100 100.1 (should error during JSON parsing)
+
+# JSON false literal with trailing text
+# FIXME: a literal followed by text should not be highlighted as a literal.
+parent1.child03= false  hello boolean literal
 
 # JSON fake JSON string literal.
 # The "comment"  trailing the string is part of the value 
