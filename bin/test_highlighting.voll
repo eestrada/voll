@@ -32,7 +32,7 @@ parent1.child07=100.1
 parent1.child08=-100.1
 #
 # JSON negative float literal with padding spaces
-parent1.child08= -100.1   
+parent1.child08 = -100.1   
 
 # JSON string literal
 parent1.child09="quoted"
@@ -47,16 +47,29 @@ parent1.child11="quoted with \"internal\" escapes"
 parent1.child14=unquoted value (should error during JSON parsing)
 
 # Not a JSON literal. Embedded quotes should NOT highlight like a string.
-parent1.child14=unquoted value "with quotes embedded" (should error during JSON parsing)
+parent1.child14=unquoted value "with quotes embedded" (should error during JSON parsing)  
 
 # Not a JSON literal. Embedded literals should NOT highlight like literals.
 parent1.child14=unquoted value with embedded literals true false null 100 100.1 (should error during JSON parsing)
 
 # JSON false literal with trailing text
-# FIXME: a literal followed by text should not be highlighted as a literal.
 parent1.child03= false  hello boolean literal
+
+# The "comment"  trailing the string is part of the value 
+# and should NOT be highlighted as a comment.
+# Because the preceding text is not valid JSON,
+# it should just look like a plain old VOLL value.
+parent1.child15=value #this should NOT be highlighted as a comment
 
 # JSON fake JSON string literal.
 # The "comment"  trailing the string is part of the value 
 # and should NOT be highlighted as a comment.
+# It should be highlighted as an ERROR.
 parent1.child15="value" #this should NOT be highlighted as a comment
+
+# JSON negative int literal with padding spaces
+# The "comment"  trailing the string is part of the value 
+# and should NOT be highlighted as a comment.
+# It should be highlighted as an ERROR.
+parent1.child06= -100 #this should NOT be highlighted as a comment
+

@@ -7,29 +7,31 @@ if exists('b:current_syntax')
   finish
 endif
 
-syntax match vollStartBlank /\v^[ \t]*/ nextgroup=vollComment,vollIdentifier
-syntax keyword vollTodo contained TODO FIXME XXX NOTE
-syntax match vollComment "\v#.*$" contained contains=vollTodo
+syn match vollLineStart /\v^[ \t]*/ nextgroup=vollComment,vollIdentifier
+syn keyword vollTodo contained TODO FIXME XXX NOTE
+syn match vollComment "\v#.*$" contained contains=vollTodo
 
-syntax match vollIdentifier "\v[a-zA-Z][a-zA-Z0-9_.]*" contained nextgroup=vollPreAssignmentBlank
-syntax match vollPreAssignmentBlank "\v[ \t]*" contained nextgroup=vollAssignment
-syntax match vollAssignment "\v\=" contained skipwhite nextgroup=vollJsonFloat,vollJsonNumber,vollJsonBoolean,vollJsonNull,vollJsonString
+syn match vollIdentifier "\v[a-zA-Z][a-zA-Z0-9_.]*" contained skipwhite nextgroup=vollAssignment
+syn match vollAssignment "\v\=" contained skipwhite nextgroup=vollJsonFloat,vollJsonNumber,vollJsonBoolean,vollJsonNull,vollJsonString
 
-" Add proper highlight for JSON style literals
+" Add proper highlighting for JSON literals.
 
 " XXX: Types with `Json` in the name are parsed like JSON to visually indicate what is JSON compatible and what is not.
 
 " TODO: support more floating point formats that are JSON compatible
-syntax match vollJsonFloat "\v-?\d+\.\d+[ \t]*$" contained
-syntax match vollJsonNumber "\v-?\d+[ \t]*$" contained
-syntax keyword vollJsonBoolean contained true false
-syntax keyword vollJsonNull contained null
+syn match vollJsonFloat "\v-?\d+\.\d+" contained skipwhite nextgroup=vollJsonError
+
+" FIXME: Number regex is taking precedence over float regex (i.e. floats aren't parsing correctly).
+syn match vollJsonNumber "\v-?\d+" contained skipwhite nextgroup=vollJsonError
+syn keyword vollJsonBoolean contained true false skipwhite nextgroup=vollJsonError
+syn keyword vollJsonNull contained null skipwhite nextgroup=vollJsonError
 
 " FIXME: JSON strings do not properly support all JSON escapes yet.
-syntax region vollJsonString start=/\v"/ skip=/\v\\./ end=/\v"[ \t]*$/ oneline contained
+syn region vollJsonString start=/\v"/ skip=/\v\\./ end=/\v"/ oneline contained skipwhite nextgroup=vollJsonError
 
-hi def link vollStartBlank         Ignore
-hi def link vollPreAssignmentBlank Ignore
+" Only shown if extra text trails a JSON literal.
+syn match vollJsonError "\v[^ \t].*$" contained
+
 hi def link vollTodo               Todo
 hi def link vollComment            Comment
 hi def link vollIdentifier         Identifier
@@ -39,5 +41,6 @@ hi def link vollJsonNumber         Number
 hi def link vollJsonBoolean        Boolean
 hi def link vollJsonNull           Constant
 hi def link vollJsonString         String
+hi def link vollJsonError          Error
 
 let b:current_syntax = 'voll'
