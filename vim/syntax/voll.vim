@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: VOLL
 " Maintainer: Ethan Estrada
-" Latest Revision: 22 October 2024
+" Latest Revision: 23 October 2024
 
 if exists('b:current_syntax')
   finish
@@ -11,8 +11,10 @@ syn match vollLineStart /\v^[ \t]*/ nextgroup=vollComment,vollIdentifier
 syn keyword vollTodo contained TODO FIXME XXX NOTE
 syn match vollComment "\v#.*$" contained contains=vollTodo
 
-syn match vollIdentifier "\v[a-zA-Z][a-zA-Z0-9_.]*" contained skipwhite nextgroup=vollAssignment
+syn match vollIdentifier "\v[a-zA-Z][a-zA-Z0-9_.]*" contained skipwhite nextgroup=vollAssignment,vollAssignmentError,vollIdentifierError
+syn match vollIdentifierError "\v[^a-zA-Z0-9_.= \t]+" contained nextgroup=vollAssignment,vollAssignmentError,vollIdentifier
 syn match vollAssignment "\v\=" contained skipwhite nextgroup=vollJsonFloat,vollJsonNumber,vollJsonBoolean,vollJsonNull,vollJsonString
+syn match vollAssignmentError "\v[^=]+$" contained
 
 " Add proper highlighting for JSON literals.
 
@@ -42,5 +44,7 @@ hi def link vollJsonBoolean        Boolean
 hi def link vollJsonNull           Constant
 hi def link vollJsonString         String
 hi def link vollJsonError          Error
+hi def link vollIdentifierError    Error
+hi def link vollAssignmentError    Error
 
 let b:current_syntax = 'voll'

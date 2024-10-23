@@ -34,6 +34,12 @@ parent1.child08=-100.1
 # JSON negative float literal with padding spaces
 parent1.child08 = -100.1   
 
+# JSON negative float literal with padding spaces
+bad-key+dasdf&^&*()dfasdf = -100.1   
+
+# No assignment should highlight as an error.
+good.key with no explicit assignment
+
 # JSON string literal
 parent1.child09="quoted"
 
