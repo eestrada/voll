@@ -1,7 +1,7 @@
 " Vim syntax file
-" Language: VOLL
-" Maintainer: Ethan Estrada
-" Latest Revision: 23 October 2024
+" Language:         VOLL
+" Original Author:  Ethan Estrada
+" Latest Change:    23 October 2024
 
 if exists('b:current_syntax')
   finish
