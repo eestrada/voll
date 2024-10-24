@@ -15,6 +15,7 @@ Option flags MUST come before arguments.
         -h:        Print help and exit.
         -i:        Identity. Literally just sends out what came in.
                    This is the default action.
+        -l:        Lint. Print lines that do not conform to syntax.
         -g <key>:  Get the value associated with the given key (after any requested stripping)
                    Command exits with a non-zero status code if it isn't found.
                    This is to differentiate between a key that doesn't exist
@@ -74,6 +75,7 @@ usage() {
 
 # Action flag options
 # - i : identity
+# - l : lint
 # - g : get value associated with key.
 # - a : Conform all (keys and values)
 # - k : Conform keys.
@@ -95,13 +97,16 @@ json_flag='o'
 # - l : Treat VOLL input values as JSON literals (the default).
 json_value_flag='l'
 
-while getopts ":hig:c:w:q:j:s:" opt; do
+while getopts ":hilg:c:w:q:j:s:" opt; do
     case "${opt}" in
     h)
         usage 0
         ;;
     i)
         action_flag='i'
+        ;;
+    l)
+        action_flag='l'
         ;;
     g)
         action_flag='g'
@@ -187,6 +192,10 @@ trim_all() {
     sed -E "s/${main_ltrim_value_re}/\1=\2/; ${rtrim_sed_re}"
 }
 
+lint_stream() {
+    grep -vEHn "${blank_re}|${comment_re}|${main_re}" "$in_file"
+}
+
 get_value_by_key() {
     _key="$1"
     is_key "$_key" ||
@@ -255,6 +264,15 @@ esac
 # action_flag='i'
 # get_key=
 case "${action_flag}" in
+i)
+    # Do nothing in "identity" case.
+    cat "$in_file"
+    exit
+    ;;
+l)
+    lint_stream
+    exit
+    ;;
 g)
     # shellcheck disable=2002
     get_value_by_key "$get_key"
@@ -269,9 +287,6 @@ k)
     ;;
 v)
     # conform values.
-    ;;
-i)
-    # Do nothing in "identity" case.
     ;;
 *)
     usage 2
