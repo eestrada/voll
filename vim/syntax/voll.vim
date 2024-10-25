@@ -23,19 +23,19 @@ syn match vollAssignmentError "\v[^=]+$" contained
 " XXX: Types with `Json` in the name are parsed like JSON to visually indicate what is JSON compatible and what is not.
 
 " NOTE: Pulled the Number regex from the JSON syntax definition.
-syn match vollJsonNumber "-\=\<\%(0\|[1-9]\d*\)\%(\.\d\+\)\=\%([eE][-+]\=\d\+\)\=\>" contained skipwhite nextgroup=vollJsonError
-syn keyword vollJsonBoolean contained true false skipwhite nextgroup=vollJsonError
-syn keyword vollJsonNull contained null skipwhite nextgroup=vollJsonError
+syn match vollJsonNumber "-\=\<\%(0\|[1-9]\d*\)\%(\.\d\+\)\=\%([eE][-+]\=\d\+\)\=\>" contained skipwhite nextgroup=vollJsonWarning
+syn keyword vollJsonBoolean contained true false skipwhite nextgroup=vollJsonWarning
+syn keyword vollJsonNull contained null skipwhite nextgroup=vollJsonWarning
 
 " NOTE: Pulled the string and escape sequence regex from the JSON syntax definition.
-syn region vollJsonString start=/\v"/ skip=/\\\\\|\\"/ end=/\v"/ oneline contained skipwhite contains=vollJsonEscape nextgroup=vollJsonError
+syn region vollJsonString start=/\v"/ skip=/\\\\\|\\"/ end=/\v"/ oneline contained skipwhite contains=vollJsonEscape nextgroup=vollJsonWarning
 
 " Syntax: Escape sequences
 syn match vollJsonEscape "\\["\\/bfnrt]" contained
 syn match vollJsonEscape "\\u\x\{4}" contained
 
 " Only shown if extra text trails a JSON literal.
-syn match vollJsonError "\v[^ \t].*$" contained
+syn match vollJsonWarning "\v[^ \t].*$" contained
 
 hi def link vollComment            Comment
 hi def link vollNormalComment      Comment
@@ -49,7 +49,7 @@ hi def link vollJsonBoolean        Boolean
 hi def link vollJsonNull           Constant
 hi def link vollJsonString         String
 hi def link vollJsonEscape         Special
-hi def link vollJsonError          Error
+hi def link vollJsonWarning        Todo
 hi def link vollIdentifierError    Error
 hi def link vollAssignmentError    Error
 

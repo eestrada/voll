@@ -14,5 +14,7 @@ setlocal comments=:#
 setlocal formatoptions-=t
 setlocal formatoptions+=cro/q
 
+compiler voll_sh
+
 " Let Vim know how to disable the plug-in.
-let b:undo_ftplugin = 'setlocal commentstring< comments< formatoptions<'
+let b:undo_ftplugin = 'setlocal commentstring< comments< formatoptions< makeprg< errorformat<'
