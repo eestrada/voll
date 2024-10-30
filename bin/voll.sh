@@ -16,6 +16,13 @@ Option flags MUST come before arguments.
         -i:        Identity. Literally just sends out what came in.
                    This is the default action.
         -l:        Lint. Print lines that do not conform to syntax.
+        -f:        Output flat JSON. This creates a flat JSON file
+                   which maps flat keys to values.
+                   It is not nested. Because of how simple this is,
+                   it is not required to have `jq` installed to use this action.
+                   If the incoming VOLL file has repeat keys,
+                   the JSON will have repeat keys as well.
+                   No error checking is done to ensure values are valid JSON.
         -g <key>:  Get the value associated with the given key (after any requested stripping)
                    Command exits with a non-zero status code if it isn't found.
                    This is to differentiate between a key that doesn't exist
@@ -26,7 +33,7 @@ Option flags MUST come before arguments.
                    Comments and blank lines are left unchanged.
                    Quote stripping arguments are currently ignored.
                    It is always safe to conform keys.
-                   Depending on the expectations of ingestingn programs,
+                   Depending on the expectations of ingesting programs,
                    it may or may not be safe to conform values.
 
     Basic Formatting flags:
@@ -76,6 +83,7 @@ usage() {
 # Action flag options
 # - i : identity
 # - l : lint
+# - f : output flat JSON file.
 # - g : get value associated with key.
 # - a : Conform all (keys and values)
 # - k : Conform keys.
@@ -97,7 +105,7 @@ json_flag='o'
 # - l : Treat VOLL input values as JSON literals (the default).
 json_value_flag='l'
 
-while getopts ":hilg:c:w:q:j:s:" opt; do
+while getopts ":hilfg:c:w:q:j:s:" opt; do
     case "${opt}" in
     h)
         usage 0
@@ -107,6 +115,9 @@ while getopts ":hilg:c:w:q:j:s:" opt; do
         ;;
     l)
         action_flag='l'
+        ;;
+    f)
+        action_flag='f'
         ;;
     g)
         action_flag='g'
@@ -196,6 +207,18 @@ lint_stream() {
     grep -vEHn "${blank_re}|${comment_re}|${main_re}" "$in_file"
 }
 
+voll_to_flat_json() {
+    set -e
+    printf '{\n'
+    # shellcheck disable=2002
+    cat "$in_file" |
+        filter_blank_lines |
+        filter_comment_lines |
+        trim_all |
+        sed -E -e "\$ ! s/${main_re}/  \"\\1\": \\2\\,/" -e "\$ s/${main_re}/  \"\\1\": \\2/"
+    printf '}\n'
+}
+
 get_value_by_key() {
     _key="$1"
     is_key "$_key" ||
@@ -271,6 +294,10 @@ i)
     ;;
 l)
     lint_stream
+    exit
+    ;;
+f)
+    voll_to_flat_json
     exit
     ;;
 g)

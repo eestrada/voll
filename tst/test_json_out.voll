@@ -31,3 +31,18 @@ parent1.child12=-0.0
 #     "child12": -0.0
 #   }
 # }
+
+# This should generate a flat JSON file that looks similar to the following:
+# {
+#   "parent1.child01": true,
+#   "parent1.child03": false,
+#   "parent1.child04": null,
+#   "parent1.child05": 100,
+#   "parent1.child06": -100,
+#   "parent1.child07": 100.1,
+#   "parent1.child08": -100.1,
+#   "parent1.child09": "quoted",
+#   "parent1.child10": "quoted with leading and trailing whitespace",
+#   "parent1.child11": 0.0,
+#   "parent1.child12": -0.0
+# }
