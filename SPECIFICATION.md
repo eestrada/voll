@@ -171,7 +171,7 @@ print(list(parent.children.keys())) # ['c1', 'c2']
 ```
 
 Implementations MAY provide a simplified nested interface
-that ignores assigned values,
+that ignores values assigned to parent keys,
 but to do so it MUST clearly document
 that the interface can/will throw away config data.
 
