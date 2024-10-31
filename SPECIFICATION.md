@@ -35,7 +35,10 @@ keys and values SHALL NOT cross multiple lines.
 There is no such thing as a multiline string.
 
 Configuration values are of the format `<key>=<value>` followed by a newline.
-There SHALL NOT be any space between the key and the equals sign.
+There MAY be whitespace between the start of the line and the key:
+its presence is ignored and it is not part of the key.
+There MAY be whitespace between the key and the equals sign:
+its presence is ignored and it is not part of the key.
 Whitespace characters following the equals sign
 that precede non-whitespace characters
 MUST be included in the parsed value string.
@@ -77,7 +80,9 @@ They are ignored.
 Lines where the first non-whitespace character is a hash (`#`)
 are considered a comment line and are ignored.
 Comments SHALL NOT trail behind a value on a line;
-it MUST be included as part of the value.
+comments MUST be specified alone on a line.
+Any hash characters in a value MUST be included as part of the value;
+these do not indicate a comment.
 
 Blank lines containing only whitespace are allowed.
 They are ignored.
@@ -89,12 +94,46 @@ and know that the new value will take precedence over any prior declarations.
 
 #### Value Arrays
 
-TBD
+The array specification has not been finalized.
+Below are some thoughts on the subject.
+
+Voll arrays thoughts:
+
+- I can't figure out an easy way to stream it without backtracking.
+  You could begin by creating an array if you only find number strings as keys,
+  and then change back to a JSON object once a non-number key is encountered.
+  Regardless, the logic gets a bit difficult.
+- I think the simplest is,
+  after all parsing into a JSON-like object is complete,
+  walk the hierarchy
+  and find any objects where all keys can be interpreted
+  as decimal integer numbers
+  (numbers padded with leading zeros are acceptable).
+  Once this situation is encountered,
+  first sort alphabetically,
+  then sort numerically.
+  The second sort should be a stable sort so as not to lose relative ordering.
+  The first sort need not be a stable sort
+  since there are no repeated keys possible anyway.
+  Then dedupe,
+  favoring the first(?) number found.
+  Finally, build an array with the deduped sorted values.
+  Replace the object with the array.
+  This can be done top down.
+- The idea behind which is sorted first:
+  - If the user has values with leading zeros for padding,
+    should those be chosen? They would sort first.
+    Or what if automated tools append a value to the config and don't pad with zeros,
+    should those be chosen?
+    They would be chosen as the second value.
+    Repeat values of either type with identical keys
+    would already have been deduped in the initial hashmap creation.
 
 #### Concatenating values
 
-NOTE: The current plan is to disallow concatenating string values.
-However, more investigation is needed.
+VOLL does not support string concatenation.
+This would go against the idempotent,
+"last-value-wins" approach taken in the specification.
 
 ### Implementation Requirements
 
@@ -103,7 +142,7 @@ to look up values using the entire, unmodified key.
 This MUST default to being case sensitive.
 
 Implementations MAY allow for case-insensitive direct key lookup.
-This SHOULD be implemented as a separate procedure
+This MAY be implemented as a separate procedure
 or as an optional parameter to the primary procedure.
 Either way, it MUST NOT be the primary form of lookup.
 
@@ -143,14 +182,39 @@ a particular interfaces is full or simplified.
 
 Implementations MUST collapse adjacent dots down to a single dot
 for nested interfaces.
-Adjacent dots are assumed to be a user error.
+Adjacent dots are assumed to be a user error
+that is silently adjusted for.
+
+Implementations MUST strip all trailing dots for nested interfaces.
+Trailing dots are assumed to be a user error
+that is silently adjusted for.
+
+Implementations MAY error on adjacent dots upon user request.
+This error MAY be at parse time.
+If an implementation does allow for erroring on adjacent dots,
+this MUST NOT be the default mode of operation.
+
+Implementations MAY error on trailing dots upon user request.
+This error MAY be at parse time.
+If an implementation does allow for erroring on trailing dots,
+this MUST NOT be the default mode of operation.
 
 Implementations MUST NOT automatically collapse adjacent dots
+for the direct key lookup interface.
+
+Implementations MUST NOT automatically strip trailing dots
 for the direct key lookup interface.
 
 Implementations MAY allow an option
 to collapse adjacent dots for direct key lookup.
 This option MUST default to off (i.e. no collapsing by default).
+This option, if present SHOULD NOT be a parse time option.
+All keys SHOULD be parsed and loaded unmodified.
+The option SHOULD only be used during lookup time.
+
+Implementations MAY allow an option
+to strip trailing dots for direct key lookup.
+This option MUST default to off (i.e. no stripping by default).
 This option, if present SHOULD NOT be a parse time option.
 All keys SHOULD be parsed and loaded unmodified.
 The option SHOULD only be used during lookup time.
@@ -221,7 +285,7 @@ For example,
 a procedure may be supplied to only parse the values `true` and `false` as booleans,
 which are the only allowable boolean values in JSON.
 Such a procedure should be clearly named such as `parseAsJsonBoolean`.
-An implementation instead may instead use an optional parameter
+An implementation may instead use an optional parameter
 on the main boolean conversion procedure to enable this behavior.
 
 Implementations MUST NOT allow the convenience procedures
@@ -319,6 +383,8 @@ For example `config1..config2=value`.
 This is confusing.
 Adjacent dots are silently ignored by implementations for nested interfaces,
 because they are assumed to be a user error.
+Implementations may silently collapse adjacent dots under other circumstances.
+Thus, do not make adjacent dots part of your application config spec.
 
 Applications SHOULD NOT specify/require nested configuration values
 where the parent also has a value assigned.
@@ -333,6 +399,9 @@ parent.child2=true
 # This is potentially confusing.
 parent=true
 ```
+
+In a VOLL to JSON transformation,
+the value assigned to the parent will be silently dropped.
 
 This would be better defined this way:
 
@@ -350,4 +419,28 @@ parent.enabled=true
 
 ### User Recommendations
 
-Be awesome: use VOLL.
+Because VOLL uses the hash character for specifying comments,
+VOLL files can easily include a shebang (AKA hashbang)
+at the beginning of the file.
+This, along with setting the execute flag on the file
+will allow invoking the VOLL config with an external script or application.
+
+For example:
+
+```sh
+#!/usr/bin/env my_interpreter --config_file
+
+setting1=true
+setting2=false
+```
+
+This way, multiple invocations of an interpreter or tool
+can be configured differently with different VOLL files
+and be invoked easily.
+
+See [the wikipedia article on shebangs](<https://en.wikipedia.org/wiki/Shebang_(Unix)>)
+for more details.
+
+### References
+
+- [ASCII character reference along with Unicode names](https://github.com/eestrada/lookup-computer/blob/master/ascii.csv)

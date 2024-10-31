@@ -151,15 +151,16 @@ in_file="${1:-'-'}"
 
 ws_re='[ \t]*'
 key_re='[a-zA-Z][a-zA-Z0-9_.]*'
-safe_key_re='s/\./\\./'
-main_re='^[ \t]*([a-zA-Z][a-zA-Z0-9_.]*)[ \t]*=(.*)$'
-main_ltrim_value_re='^[ \t]*([a-zA-Z][a-zA-Z0-9_.]*)[ \t]*=[ \t]*(.*)$'
-comment_re='^[ \t]*(#.*)$'
-blank_re='^[ \t]*$'
-list_key_re="s/${main_re}/\1/"
-list_value_re="s/${main_re}/\2/"
-ltrim_sed_re='s/^[ \t]*//'
-rtrim_sed_re='s/[ \t]*$//'
+main_re="^(${ws_re})(${key_re})(${ws_re})=(.*)\$"
+main_ltrim_value_re="^(${ws_re})(${key_re})(${ws_re})=(${ws_re})(.*)\$"
+comment_re="^(${ws_re})(#.*)\$"
+blank_re="^(${ws_re})\$"
+list_key_sedexp="s/${main_re}/\\2/"
+list_value_sedexp="s/${main_re}/\\4/"
+ltrim_sed_sedexp="s/^${ws_re}//"
+rtrim_sed_sedexp="s/${ws_re}$//"
+safe_key_sedexp='s/\./\\./'
+collapse_dots_sedexp='s/\.+/./'
 
 _sed_cmd_str=""
 
@@ -175,8 +176,6 @@ is_key() {
     _key="$1"
     if [ -n "${_key}" ] && [ "$(printf '%s' "${_key}" | wc -l)" -le '1' ]; then
         # `grep` returns non-zero when it finds no matches.
-        # `sed` only returns non-zero on error.
-        # It isn't clear that this counts as an error.
         printf '%s' "${_key}" | grep -E "^${key_re}$" >/dev/null
     else
         return 1
@@ -184,23 +183,23 @@ is_key() {
 }
 
 list_keys() {
-    sed -E "${list_key_re}"
+    sed -E "${list_key_sedexp}"
 }
 
 list_values() {
-    sed -E "${list_value_re}"
+    sed -E "${list_value_sedexp}"
 }
 
 ltrim_lines() {
-    sed -E "${ltrim_sed_re}"
+    sed -E "${ltrim_sed_sedexp}"
 }
 
 rtrim_lines() {
-    sed -E "${rtrim_sed_re}"
+    sed -E "${rtrim_sed_sedexp}"
 }
 
 trim_all() {
-    sed -E "s/${main_ltrim_value_re}/\1=\2/; ${rtrim_sed_re}"
+    sed -E "s/${main_ltrim_value_re}/\\2=\\5/; ${rtrim_sed_sedexp}"
 }
 
 lint_stream() {
@@ -215,7 +214,7 @@ voll_to_flat_json() {
         filter_blank_lines |
         filter_comment_lines |
         trim_all |
-        sed -E -e "\$ ! s/${main_re}/  \"\\1\": \\2\\,/" -e "\$ s/${main_re}/  \"\\1\": \\2/"
+        sed -E -e "\$ ! s/${main_re}/  \"\\2\": \\4\\,/" -e "\$ s/${main_re}/  \"\\2\": \\4/"
     printf '}\n'
 }
 
