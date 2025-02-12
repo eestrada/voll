@@ -1,8 +1,21 @@
 AllCops:
   TargetRubyVersion: 3.0
+  NewCops: enable
 
-Style/StringLiterals:
-  EnforcedStyle: double_quotes
+Style/SymbolArray:
+  Enabled: false
 
-Style/StringLiteralsInInterpolation:
-  EnforcedStyle: double_quotes
+Style/TrailingCommaInArguments:
+  Enabled: false
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: false
+
+Style/RaiseArgs:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
