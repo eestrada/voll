@@ -76,11 +76,15 @@ which is a footgun.
 
 YAML may be the worst configuration language ever foisted upon us all.
 Its semantics are not clear
-and many values get coerced into unexpected types without warning.
+and values can be coerced into unexpected types without warning.
 
 [Some parsers](https://hitchdev.com/strictyaml/why/implicit-typing-removed/)
 have explicitly chosen to **not** be compliant with the spec
 just so that users can have a sane experience editing files.
+
+YAML is so complicated that there are literally paid
+[educational courses](https://www.educative.io/courses/introduction-to-yaml)
+on how to read and use it.
 
 Don't choose YAML.
 
@@ -110,8 +114,72 @@ Yes.
 
 ## Tell me more!
 
-Read the [specification](SPECIFICATION.md).
+If you want the full story, read the [specification](SPECIFICATION.md)
+(it is not very long).
+
+A short example is worth more than short description.
+This code snippet is marked as `dotenv`, since no voll syntax currently exists for GFM.
+If you want a better example of highlighting,
+see the vim syntax file in this repo.
+
+```dotenv
+# Commented lines start with a pound sign (AKA hash).
+    # Leading whitespace on a line is not significant
+
+# Blank lines are ignored
+
+# Keys and values are separated by an equals sign
+key = value
+
+# Be default, everything after the equals sign until the next newline is the value, including *ALL* whitespace
+key2 =                   value with lots of white space
+
+# keys can be repeated. By default, new key declarations overrule older ones.
+# This makes it trivial for tools to append lines to a config
+# and know that their changes will be picked up
+# (assuming another tool does not do the same thing later).
+key = a new value overwrites the old value
+
+# The spec allows for values to be parsed as JSON scalar values instead of raw values.
+# This is optional. There are no "malformed values" by default.
+json_string = "Hello string"
+json_null = null
+json_bool_true = true
+json_bool_false = false
+json_int = 123
+json_float = 123.0
+
+# Keys can use dots to indicate nesting.
+# Advanced parsers can put this into a nested dictionary-like structure, mimicking JSON.
+# Alternatively, you can just look up the raw key directly using the full key.
+parent.child1 = true
+parent.child2 = false
+
+# Other than nested key structures,
+# more complicated arrays and objects are not directly supported.
+# But parsers can do whatever they want with values.
+# Again, it is just raw keys and values at the end of the day.
+json_array = ["Parsing", "a", "JSON", "array", "value", "is", "a", "bit", "confusing", "but", "you", "can", "do", "it"]
+
+# There is no string concatenation in the official spec. You can only replace previous key/value pairs.
+# However, the format is so simple, you can use your own imagination
+# to implement a parser that does this for your specific application's needs.
+# So long as your parser supports the default syntax and behavior,
+# it is still considered a compliant implementation.
+#
+# For example, you could treat a plus sign after an equals sign as concatenation for strings.
+cat_key = "Base string"
+cat_key =+" can be append to with some imagination!"
+
+# You could treat square brackets as appending JSON scalar values to an array.
+ary_key =[]"one"
+ary_key =[]"two"
+
+# So long as you comply with the format <key> <equal sign> <value>,
+# you can do whatever you want, really.
+```
 
 ## License/Copyright/Copying
 
-This code is made available under the [0BSD license](https://landley.net/toybox/license.html).
+This specification and accompanying code are made available under the
+[0BSD license](https://landley.net/toybox/license.html).
