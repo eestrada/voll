@@ -150,7 +150,7 @@ shift $((OPTIND - 1))
 in_file="${1:-'-'}"
 
 ws_re='[ \t]*'
-key_re='[a-zA-Z][a-zA-Z0-9_.]*'
+key_re='[a-zA-Z][a-zA-Z0-9_.-]*'
 main_re="^(${ws_re})(${key_re})(${ws_re})=(.*)\$"
 main_ltrim_value_re="^(${ws_re})(${key_re})(${ws_re})=(${ws_re})(.*)\$"
 comment_re="^(${ws_re})(#.*)\$"

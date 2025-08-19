@@ -1,7 +1,6 @@
 " Vim filetype plugin
 " Language:         VOLL
 " Original Author:  Ethan Estrada
-" Last Change:      23 October 2024
 
 if exists('b:did_ftplugin')
   finish

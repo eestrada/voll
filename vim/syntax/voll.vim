@@ -1,7 +1,6 @@
 " Vim syntax file
 " Language:        VOLL
 " Original Author: Ethan Estrada
-" Latest Change:   24 October 2024
 
 if exists('b:current_syntax')
   finish
@@ -13,8 +12,8 @@ syn match vollComment "\v\#" contained nextgroup=vollShebangComment,vollNormalCo
 syn match vollNormalComment "\v[^!].*$" contained contains=vollTodo
 syn match vollShebangComment "\v\!.+$" contained
 
-syn match vollIdentifier "\v[a-zA-Z][a-zA-Z0-9_.]*" contained skipwhite nextgroup=vollAssignment,vollAssignmentError,vollIdentifierError
-syn match vollIdentifierError "\v[^a-zA-Z0-9_.= \t]+" contained nextgroup=vollAssignment,vollAssignmentError,vollIdentifier
+syn match vollIdentifier "\v[a-zA-Z][a-zA-Z0-9_.-]*" contained skipwhite nextgroup=vollAssignment,vollAssignmentError,vollIdentifierError
+syn match vollIdentifierError "\v[^a-zA-Z0-9_.= \t-]+" contained nextgroup=vollAssignment,vollAssignmentError,vollIdentifier
 syn match vollAssignment "\v\=" contained skipwhite nextgroup=vollJsonNumber,vollJsonBoolean,vollJsonNull,vollJsonString
 syn match vollAssignmentError "\v[^=]+$" contained
 

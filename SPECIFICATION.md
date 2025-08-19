@@ -53,36 +53,44 @@ are included in the parsed value.
 Keys MUST adhere to the following regex:
 
 ```regex
-[a-zA-Z][a-zA-Z0-9_.]*
+[a-zA-Z][a-zA-Z0-9_.-]*
 ```
 
-In written language, this is an ASCII letter for the first
-character, and all subsequent characters must be ASCII alphanumeric values
-or underscore (`_`) or dot (`.` AKA "period").
+In written language, this is an ASCII letter for the first character,
+and all subsequent characters must be ASCII alphanumeric values
+or underscore (`_`) or dot (`.` AKA "period") or hyphen (`-`).
 A key MUST contain at least one character.
-There is no upper limit to the length of a key.
+There is no set upper limit to the length of a key.
 
 Keys MUST be considered case sensitive by default.
 
 Values after the equals sign may hold any UTF-8 code points
 except newline (`\n`) and NUL (`\0`).
 This includes double quotation marks (`"`) and single quotation marks (`'`);
-these values MUST NOT be automatically stripped out.
+either style of quotation marks MUST NOT be automatically stripped out.
 
 In short, implementations MUST NOT treat any value characters specially other
 than newline or NUL.
 
 All values are always strings.
-Values MUST NOT be implicitly cast to another type.
+Values MUST NOT be automatically cast to another type by default.
 
 Line comments are allowed.
 They are ignored.
 Lines where the first non-whitespace character is a hash (`#`)
 are considered a comment line and are ignored.
+
 Comments SHALL NOT trail behind a value on a line;
 comments MUST be specified alone on a line.
 Any hash characters in a value MUST be included as part of the value;
-these do not indicate a comment.
+these SHALL NOT be treated as a comment.
+
+For example:
+
+```voll
+# This is a comment line
+key = "red herring" # everything after '=' is a value on this line, including everything after the hash.
+```
 
 Blank lines containing only whitespace are allowed.
 They are ignored.
@@ -150,7 +158,7 @@ Implementations MAY provide an interface to look up values in a nested fashion.
 
 Implementations that provide a full nested interface
 MUST allow for the possibility that both a value
-*and* nested children can be assigned to a single key.
+_and_ nested children can be assigned to a single key.
 An example interface in Python might be:
 
 ```python
@@ -235,14 +243,14 @@ Other possible examples values are welcome.
 Thus, these could be automatically, and silently,
 converted between an integer and string:
 
-```sh
+```voll
 some_number_config=10
 another_number_config=0
 ```
 
 These could not:
 
-```sh
+```voll
 # Keep these as strings
 ambiguous_config="10"
 another_ambiguous_config=+10
@@ -390,7 +398,7 @@ Applications SHOULD NOT specify/require nested configuration values
 where the parent also has a value assigned.
 For example:
 
-```sh
+```voll
 # We want to enable/disable some nested child features.
 parent.child1=false
 parent.child2=true
@@ -401,11 +409,12 @@ parent=true
 ```
 
 In a VOLL to JSON transformation,
-the value assigned to the parent will be silently dropped.
+the value assigned to the parent may be silently dropped,
+or the children silently dropped.
 
 This would be better defined this way:
 
-```sh
+```voll
 parent.child1.enabled=false
 parent.child2.enabled=true
 parent.enabled=true
@@ -427,7 +436,7 @@ will allow invoking the VOLL config with an external script or application.
 
 For example:
 
-```sh
+```voll
 #!/usr/bin/env my_interpreter --config_file
 
 setting1=true
@@ -444,3 +453,4 @@ for more details.
 ### References
 
 - [ASCII character reference along with Unicode names](https://github.com/eestrada/lookup-computer/blob/master/ascii.csv)
+- [Ghostty config syntax is very similar to voll](https://ghostty.org/docs/config#syntax)

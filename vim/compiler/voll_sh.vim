@@ -1,7 +1,6 @@
 " Vim compiler file
 " Compiler:        voll.sh
 " Original Author: Ethan Estrada
-" Last Change:     23 October 2024
 
 if exists('current_compiler')
   finish
